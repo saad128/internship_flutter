@@ -31,9 +31,26 @@ class Products with ChangeNotifier {
         imageUrl: 'https://5.imimg.com/data5/YF/MO/MY-41009203/fancy-ladies-scarf-500x500.jpg'),
   ];
 
+  // var _showFavoritesOnly = false;
+
   List<Product> get items {
+    // if(_showFavoritesOnly){
+    //   return _items.where((element) => element.isFavorite).toList();
+    // }
     return [..._items];
   }
+  List<Product> get favoriteItems {
+    return _items.where((element) => element.isFavorite).toList();
+  }
+
+  // void showFavoritesOnly(){
+  //   _showFavoritesOnly = true;
+  //   notifyListeners();
+  // }
+  // void showAll(){
+  //   _showFavoritesOnly = false;
+  //   notifyListeners();
+  // }
 
   Product findbyId(String id) {
     return _items.firstWhere((element) => element.id == id);
