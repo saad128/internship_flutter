@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:my_shop_app/providers/cart.dart';
+import 'package:my_shop_app/providers/products_provider.dart';
 import 'package:my_shop_app/screens/cart-screen.dart';
 import 'package:my_shop_app/widgets/app_drawer.dart';
 import 'package:my_shop_app/widgets/badge.dart';
@@ -16,6 +17,42 @@ class ProductOverviewScreen extends StatefulWidget {
 
 class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   var _showOnlyFavorites = false;
+  var _isInit = true;
+  var _isLoading = false;
+
+  // @override
+  // void initState() {
+  // Provider.of<Products>(context,listen: false).fetchAndSetProduct();
+  // we cannot use the provider in this init state because is won't work
+  // due to context.
+
+  //(this future delayed is first option which is work here we will be fine
+  // to go with.)
+  //   Future.delayed(Duration.zero).then((_){
+  //     Provider.of<Products>(context,listen: false).fetchAndSetProduct();
+  //   });
+  //   super.initState();
+  // }
+
+//(this the second option which is we use to get the data from provider.Both
+// options is find and we will use anyone which we want.)
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      setState(() {
+        _isLoading = true;
+      });
+      Provider.of<Products>(context, listen: false)
+          .fetchAndSetProduct()
+          .then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
+    _isInit = false;
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,20 +83,24 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
             ],
           ),
           Consumer<Cart>(
-            builder: ( _, cart, ch) => Badge(
+            builder: (_, cart, ch) => Badge(
               child: ch,
               value: cart.itemCount.toString(),
             ),
-            child:
-                IconButton(icon: Icon(Icons.shopping_cart), 
-                    onPressed: () {
+            child: IconButton(
+                icon: Icon(Icons.shopping_cart),
+                onPressed: () {
                   Navigator.of(context).pushNamed(CartScreen.routeName);
-                    }),
+                }),
           ),
         ],
       ),
       drawer: AppDrawer(),
-      body: ProductsGrid(_showOnlyFavorites),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : ProductsGrid(_showOnlyFavorites),
     );
   }
 }

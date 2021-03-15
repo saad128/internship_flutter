@@ -1,39 +1,40 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
+import 'package:my_shop_app/models/http_exception.dart';
 import 'package:my_shop_app/providers/product.dart';
 import 'package:http/http.dart' as http;
 
 class Products with ChangeNotifier {
   List<Product> _items = [
-    Product(
-      id: 'p1',
-      title: 'RedShirt',
-      description: 'A red shirt - it is pretty red!',
-      price: 29.99,
-      imageUrl:
-          'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg',
-    ),
-    Product(
-        id: 'p2',
-        title: 'Trousers',
-        description: 'A nice pair of trousers.',
-        price: 59.99,
-        imageUrl:
-            'https://5.imimg.com/data5/DS/MN/MY-14409136/mens-sports-trouser-500x500.jpg'),
-    Product(
-        id: 'p3',
-        title: 'FryingPan',
-        description: 'A nice Frying Pan.',
-        price: 19.99,
-        imageUrl:
-            'https://target.scene7.com/is/image/Target/GUEST_458a8723-a558-4c34-8bdb-513a05c87b6a?wid=488&hei=488&fmt=pjpeg'),
-    Product(
-        id: 'p4',
-        title: 'BlackScarf',
-        description: 'A nice Scarf.',
-        price: 19.99,
-        imageUrl:
-            'https://5.imimg.com/data5/YF/MO/MY-41009203/fancy-ladies-scarf-500x500.jpg'),
+    // Product(
+    //   id: 'p1',
+    //   title: 'RedShirt',
+    //   description: 'A red shirt - it is pretty red!',
+    //   price: 29.99,
+    //   imageUrl:
+    //       'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg',
+    // ),
+    // Product(
+    //     id: 'p2',
+    //     title: 'Trousers',
+    //     description: 'A nice pair of trousers.',
+    //     price: 59.99,
+    //     imageUrl:
+    //         'https://5.imimg.com/data5/DS/MN/MY-14409136/mens-sports-trouser-500x500.jpg'),
+    // Product(
+    //     id: 'p3',
+    //     title: 'FryingPan',
+    //     description: 'A nice Frying Pan.',
+    //     price: 19.99,
+    //     imageUrl:
+    //         'https://target.scene7.com/is/image/Target/GUEST_458a8723-a558-4c34-8bdb-513a05c87b6a?wid=488&hei=488&fmt=pjpeg'),
+    // Product(
+    //     id: 'p4',
+    //     title: 'BlackScarf',
+    //     description: 'A nice Scarf.',
+    //     price: 19.99,
+    //     imageUrl:
+    //         'https://5.imimg.com/data5/YF/MO/MY-41009203/fancy-ladies-scarf-500x500.jpg'),
   ];
 
   // var _showFavoritesOnly = false;
@@ -62,9 +63,36 @@ class Products with ChangeNotifier {
     return _items.firstWhere((element) => element.id == id);
   }
 
+  Future<void> fetchAndSetProduct() async {
+    const url =
+        'https://my-shop-app-354b3-default-rtdb.firebaseio.com/products.json';
+    try {
+      final response = await http.get(url);
+      final extractedData = json.decode(response.body) as Map<String, dynamic>;
+      if(extractedData == null){
+        return;
+      }
+      final List<Product> loadedProduct = [];
+      extractedData.forEach((prodId, prodData) {
+        loadedProduct.add(Product(
+          id: prodId,
+          title: prodData['title'],
+          description: prodData['description'],
+          price: prodData['price'],
+          isFavorite: prodData['isFavorite'],
+          imageUrl: prodData['imageUrl'],
+        ));
+      });
+      _items = loadedProduct;
+      notifyListeners();
+    } catch (error) {
+      throw error;
+    }
+  }
+
   Future<void> addProduct(Product product) async {
-    const url = 'https://my-shop-app-354b3-default-rtdb.firebaseio'
-        '.com/products.json';
+    const url =
+        'https://my-shop-app-354b3-default-rtdb.firebaseio.com/products.json';
     try {
       final response = await http.post(
         url,
@@ -92,9 +120,18 @@ class Products with ChangeNotifier {
     }
   }
 
-  void updateProduct(String id, Product newProduct) {
+  Future<void> updateProduct(String id, Product newProduct) async {
     final prodIndex = _items.indexWhere((element) => element.id == id);
     if (prodIndex >= 0) {
+      final url =
+          'https://my-shop-app-354b3-default-rtdb.firebaseio.com/products/$id.json';
+      await http.patch(url,
+          body: json.encode({
+            'title': newProduct.title,
+            'description': newProduct.description,
+            'price': newProduct.price,
+            'imageUrl': newProduct.imageUrl,
+          }));
       _items[prodIndex] = newProduct;
       notifyListeners();
     } else {
@@ -102,8 +139,20 @@ class Products with ChangeNotifier {
     }
   }
 
-  void deleteProduct(String id) {
-    _items.removeWhere((element) => element.id == id);
+  Future<void> deleteProduct(String id) async {
+    final url =
+        'https://my-shop-app-354b3-default-rtdb.firebaseio.com/products/$id'
+        '.json';
+    final existingProductIndex = _items.indexWhere((prod) => prod.id == id);
+    var existingProduct = _items[existingProductIndex];
+    _items.removeAt(existingProductIndex);
     notifyListeners();
+    final response = await http.delete(url);
+    if (response.statusCode >= 400) {
+      _items.insert(existingProductIndex, existingProduct);
+      notifyListeners();
+      throw HttpException('Could not delete product.');
+    }
+    existingProduct = null;
   }
 }

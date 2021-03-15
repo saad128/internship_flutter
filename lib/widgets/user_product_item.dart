@@ -12,6 +12,7 @@ class UserProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scaffold = ScaffoldMessenger.of(context);
     return ListTile(
       title: Text(title),
       leading: CircleAvatar(
@@ -31,9 +32,28 @@ class UserProductItem extends StatelessWidget {
             ),
             IconButton(
                 icon: Icon(Icons.delete),
-                onPressed: () {
-                  Provider.of<Products>(context, listen: false)
-                      .deleteProduct(id);
+                onPressed: () async {
+                  try {
+                    await Provider.of<Products>(context, listen: false)
+                        .deleteProduct(id);
+                  } catch (error) {
+                    scaffold.showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Deleting Failed!',
+                          textAlign: TextAlign.center,
+                        ),
+                        duration: Duration(milliseconds: 1500),
+                        behavior: SnackBarBehavior.floating,
+                        width: 280.0,
+                        // Width of the SnackBar.
+                        padding: EdgeInsets.symmetric(horizontal: 10.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                    );
+                  }
                 },
                 color: Theme.of(context).errorColor),
           ],
