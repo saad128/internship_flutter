@@ -22,6 +22,10 @@ class Auth with ChangeNotifier {
     return null;
   }
 
+  String get userId {
+    return _userId;
+  }
+
   Future<void> _authentication(
       String email, String password, String urlSegment) async {
     final url = 'https://identitytoolkit.googleapis'
@@ -57,10 +61,10 @@ class Auth with ChangeNotifier {
   }
 
   Future<void> signup(String email, String password) async {
-    _authentication(email, password, 'signUp');
+    return _authentication(email, password, 'signUp');
   }
 
   Future<void> login(String email, String password) async {
-    _authentication(email, password, 'signInWithPassword');
+    return _authentication(email, password, 'signInWithPassword');
   }
 }

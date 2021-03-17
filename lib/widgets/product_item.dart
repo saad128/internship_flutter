@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_shop_app/providers/auth.dart';
 import 'package:my_shop_app/providers/cart.dart';
 import 'package:my_shop_app/providers/product.dart';
 import 'package:my_shop_app/screens/product_detail_screen.dart';
@@ -15,6 +16,7 @@ class ProductItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<Cart>(context, listen: false);
+    final authData = Provider.of<Auth>(context, listen: false);
     //print('reloading item');
     return ClipRRect(
       borderRadius: BorderRadius.circular(10.0),
@@ -36,7 +38,10 @@ class ProductItem extends StatelessWidget {
               icon: Icon(
                   product.isFavorite ? Icons.favorite : Icons.favorite_border),
               onPressed: () {
-                product.toggleFavoriteStatus();
+                product.toggleFavoriteStatus(
+                  authData.token,
+                  authData.userId,
+                );
               },
               color: Theme.of(context).accentColor,
             ),
@@ -52,18 +57,23 @@ class ProductItem extends StatelessWidget {
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Added Item to cart!',),
+                  content: Text(
+                    'Added Item to cart!',
+                  ),
                   duration: Duration(milliseconds: 1500),
                   behavior: SnackBarBehavior.floating,
-                  width: 280.0, // Width of the SnackBar.
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 8.0),
+                  width: 280.0,
+                  // Width of the SnackBar.
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
-                  action: SnackBarAction(label: 'undo',onPressed: (){
-                    cart.removeSingleItem(product.id);
-                  },),
+                  action: SnackBarAction(
+                    label: 'undo',
+                    onPressed: () {
+                      cart.removeSingleItem(product.id);
+                    },
+                  ),
                 ),
               );
             },

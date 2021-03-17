@@ -77,7 +77,8 @@ class _OrderButtonState extends State<OrderButton> {
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
+    // ignore: deprecated_member_use
+    return FlatButton(
       onPressed: (widget.cart.totalAmount <= 0 || _isLoading) ? null : ()
     async {
               setState(() {
