@@ -19,7 +19,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
       setState(() {
         _isLoading = true;
       });
-      await Provider.of<Orders>(context,listen: false).fetchAndSetOrder();
+      await Provider.of<Orders>(context,listen: false).fetchAndSetOrders();
       setState(() {
         _isLoading = false;
       });

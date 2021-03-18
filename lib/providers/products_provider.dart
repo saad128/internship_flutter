@@ -68,8 +68,7 @@ class Products with ChangeNotifier {
   }
 
   Future<void> fetchAndSetProduct() async {
-    var url = 'https://my-shop-app-354b3-default-rtdb.firebaseio.com/products'
-        '.json?auth=$authToken';
+    var url = 'https://my-shop-app-354b3-default-rtdb.firebaseio.com/products.json?auth=$authToken';
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -77,31 +76,31 @@ class Products with ChangeNotifier {
         return;
       }
       url =
-          'https://my-shop-app-354b3-default-rtdb.firebaseio.com/userFavorite/$userId.json?auth=$authToken';
+      'https://my-shop-app-354b3-default-rtdb.firebaseio.com/userFavorite/$userId.json?auth=$authToken';
       final favoriteResponse = await http.get(url);
       final favoriteData = json.decode(favoriteResponse.body);
-      final List<Product> loadedProduct = [];
+      final List<Product> loadedProducts = [];
       extractedData.forEach((prodId, prodData) {
-        loadedProduct.add(Product(
+        loadedProducts.add(Product(
           id: prodId,
           title: prodData['title'],
           description: prodData['description'],
           price: prodData['price'],
           isFavorite:
-              favoriteData == null ? false : favoriteData['prodId'] ?? false,
+          favoriteData == null ? false : favoriteData[prodId] ?? false,
           imageUrl: prodData['imageUrl'],
         ));
       });
-      _items = loadedProduct;
+      _items = loadedProducts;
       notifyListeners();
     } catch (error) {
-      throw error;
+      throw (error);
     }
   }
 
   Future<void> addProduct(Product product) async {
-    final url = 'https://my-shop-app-354b3-default-rtdb.firebaseio.com/products'
-        '.json?auth=$authToken';
+    final url = 'https://my-shop-app-354b3-default-rtdb.firebaseio'
+        '.com/products .json?auth=$authToken';
     try {
       final response = await http.post(
         url,
