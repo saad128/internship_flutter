@@ -20,39 +20,50 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   var _isInit = true;
   var _isLoading = false;
 
-  // @override
-  // void initState() {
-  // Provider.of<Products>(context,listen: false).fetchAndSetProduct();
-  // we cannot use the provider in this init state because is won't work
-  // due to context.
-
-  //(this future delayed is first option which is work here we will be fine
-  // to go with.)
-  //   Future.delayed(Duration.zero).then((_){
-  //     Provider.of<Products>(context,listen: false).fetchAndSetProduct();
-  //   });
-  //   super.initState();
-  // }
-
-//(this the second option which is we use to get the data from provider.Both
-// options is find and we will use anyone which we want.)
   @override
-  void didChangeDependencies() {
+  void initState() {
+    // Provider.of<Products>(context,listen: false).fetchAndSetProduct();
+    // we cannot use the provider in this init state because is won't work
+    // due to context.
+
+    //(this future delayed is first option which is work here we will be fine
+    // to go with.)
     if (_isInit) {
       setState(() {
         _isLoading = true;
       });
-      Provider.of<Products>(context, listen: false)
-          .fetchAndSetProduct()
-          .then((_) {
-        setState(() {
-          _isLoading = false;
+      Future.delayed(Duration.zero).then((_) {
+        Provider.of<Products>(context, listen: false)
+            .fetchAndSetProduct()
+            .then((_) {
+          setState(() {
+            _isLoading = false;
+          });
         });
       });
     }
-    _isInit = false;
-    super.didChangeDependencies();
+    super.initState();
   }
+
+//(this the second option which is we use to get the data from provider.Both
+// options is find and we will use anyone which we want.)
+//   @override
+//   void didChangeDependencies() {
+//     if (_isInit) {
+//       setState(() {
+//         _isLoading = true;
+//       });
+//       Provider.of<Products>(context,listen: false)
+//           .fetchAndSetProduct()
+//           .then((_) {
+//         setState(() {
+//           _isLoading = false;
+//         });
+//       });
+//     }
+//     _isInit = false;
+//     super.didChangeDependencies();
+//   }
 
   @override
   Widget build(BuildContext context) {

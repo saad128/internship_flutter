@@ -68,6 +68,7 @@ class Products with ChangeNotifier {
   }
 
   Future<void> fetchAndSetProduct() async {
+    //final filterString = filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
     var url = 'https://my-shop-app-354b3-default-rtdb.firebaseio.com/products.json?auth=$authToken';
     try {
       final response = await http.get(url);
@@ -99,8 +100,7 @@ class Products with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
-    final url = 'https://my-shop-app-354b3-default-rtdb.firebaseio'
-        '.com/products .json?auth=$authToken';
+    final url = 'https://my-shop-app-354b3-default-rtdb.firebaseio.com/products.json?auth=$authToken';
     try {
       final response = await http.post(
         url,
